@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:uni_links_platform_interface/uni_links_platform_interface.dart';
 
@@ -10,7 +8,7 @@ class UniLinksPlugin extends UniLinksPlatform {
 
   /// The Web URL is stored here on startup, as it's prone to changing
   /// throughout the app's lifetime.
-  final _initialLink = window.location.href;
+  final _initialLink = Uri.base.toString();
 
   @override
   Future<String?> getInitialLink() async => _initialLink;

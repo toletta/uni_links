@@ -12,9 +12,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const mChannel = MethodChannel('uni_links/messages');
   final log = <MethodCall>[];
-  mChannel.setMockMethodCallHandler((MethodCall methodCall) async {
-    log.add(methodCall);
-  });
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(mChannel, (MethodCall methodCall) async {
+        log.add(methodCall);
+        return null;
+      });
 
   tearDown(() {
     log.clear();
@@ -22,18 +24,12 @@ void main() {
 
   test('getInitialLink', () async {
     await getInitialLink();
-    expect(
-      log,
-      <Matcher>[isMethodCall('getInitialLink', arguments: null)],
-    );
+    expect(log, <Matcher>[isMethodCall('getInitialLink', arguments: null)]);
   });
 
   test('getInitialUri', () async {
     await getInitialUri();
-    expect(
-      log,
-      <Matcher>[isMethodCall('getInitialLink', arguments: null)],
-    );
+    expect(log, <Matcher>[isMethodCall('getInitialLink', arguments: null)]);
   });
 
   test('getLinksStream', () async {
