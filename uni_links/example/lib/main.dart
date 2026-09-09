@@ -25,7 +25,10 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   final _scaffoldKey = GlobalKey();
   final _cmds = getCmds();
   final _cmdStyle = const TextStyle(
-      fontFamily: 'Courier', fontSize: 12.0, fontWeight: FontWeight.w700);
+    fontFamily: 'Courier',
+    fontSize: 12.0,
+    fontWeight: FontWeight.w700,
+  );
 
   @override
   void initState() {
@@ -46,25 +49,28 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     if (!kIsWeb) {
       // It will handle app links while the app is already started - be it in
       // the foreground or in the background.
-      _sub = uriLinkStream.listen((Uri? uri) {
-        if (!mounted) return;
-        print('got uri: $uri');
-        setState(() {
-          _latestUri = uri;
-          _err = null;
-        });
-      }, onError: (Object err) {
-        if (!mounted) return;
-        print('got err: $err');
-        setState(() {
-          _latestUri = null;
-          if (err is FormatException) {
-            _err = err;
-          } else {
+      _sub = uriLinkStream.listen(
+        (Uri? uri) {
+          if (!mounted) return;
+          print('got uri: $uri');
+          setState(() {
+            _latestUri = uri;
             _err = null;
-          }
-        });
-      });
+          });
+        },
+        onError: (Object err) {
+          if (!mounted) return;
+          print('got err: $err');
+          setState(() {
+            _latestUri = null;
+            if (err is FormatException) {
+              _err = err;
+            } else {
+              _err = null;
+            }
+          });
+        },
+      );
     }
   }
 
@@ -108,9 +114,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text('uni_links example app'),
-      ),
+      appBar: AppBar(title: const Text('uni_links example app')),
       body: ListView(
         shrinkWrap: true,
         padding: const EdgeInsets.all(8.0),
@@ -143,7 +147,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         ListTile(
                           title: Text(item.key),
                           trailing: Text(item.value.join(', ')),
-                        )
+                        ),
                     ],
             ),
           ],
@@ -186,29 +190,29 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
               Text('To populate above fields open a terminal shell and run:\n'),
           ],
           intersperse(
-              commands.map<Widget>((cmd) => InkWell(
-                    onTap: () => _printAndCopy(cmd),
-                    child: Text('\n$cmd\n', style: _cmdStyle),
-                  )),
-              const Text('or')),
+            commands.map<Widget>(
+              (cmd) => InkWell(
+                onTap: () => _printAndCopy(cmd),
+                child: Text('\n$cmd\n', style: _cmdStyle),
+              ),
+            ),
+            const Text('or'),
+          ),
           [
             Text(
               '(tap on any of the above commands to print it to'
               ' the console/logger and copy to the device clipboard.)',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
-          ]
+          ],
         ].expand((el) => el).toList(),
       );
     }
 
     return Card(
       margin: const EdgeInsets.only(top: 20.0),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: platformCmds,
-      ),
+      child: Padding(padding: const EdgeInsets.all(10.0), child: platformCmds),
     );
   }
 
@@ -216,18 +220,18 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     print(cmd);
 
     await Clipboard.setData(ClipboardData(text: cmd));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copied to Clipboard')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Copied to Clipboard')));
   }
 
   void _showSnackBar(String msg) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final context = _scaffoldKey.currentContext;
       if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(msg),
-        ));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     });
   }
@@ -254,7 +258,8 @@ List<String>? getCmds() {
   if (Platform.isIOS) {
     cmd = '/usr/bin/xcrun simctl openurl booted';
   } else if (Platform.isAndroid) {
-    cmd = '\$ANDROID_HOME/platform-tools/adb shell \'am start'
+    cmd =
+        '\$ANDROID_HOME/platform-tools/adb shell \'am start'
         ' -a android.intent.action.VIEW'
         ' -c android.intent.category.BROWSABLE -d';
     cmdSuffix = "'";

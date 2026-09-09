@@ -30,6 +30,7 @@ public class UniLinksPlugin
     private String initialLink;
     private String latestLink;
     private Context context;
+    private ActivityPluginBinding activityBinding;
     private boolean initialIntent = true;
 
     private void handleIntent(Context context, Intent intent) {
@@ -80,21 +81,6 @@ public class UniLinksPlugin
         eventChannel.setStreamHandler(plugin);
     }
 
-    /** Plugin registration. */
-    public static void registerWith(@NonNull PluginRegistry.Registrar registrar) {
-        // Detect if we've been launched in background
-        if (registrar.activity() == null) {
-            return;
-        }
-
-        final UniLinksPlugin instance = new UniLinksPlugin();
-        instance.context = registrar.context();
-        register(registrar.messenger(), instance);
-
-        instance.handleIntent(registrar.context(), registrar.activity().getIntent());
-        registrar.addNewIntentListener(instance);
-    }
-
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {}
 
@@ -127,20 +113,31 @@ public class UniLinksPlugin
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
+        this.activityBinding = activityPluginBinding;
         activityPluginBinding.addOnNewIntentListener(this);
         this.handleIntent(this.context, activityPluginBinding.getActivity().getIntent());
     }
 
     @Override
-    public void onDetachedFromActivityForConfigChanges() {}
+    public void onDetachedFromActivityForConfigChanges() {
+        detachFromActivity();
+    }
 
     @Override
     public void onReattachedToActivityForConfigChanges(
             @NonNull ActivityPluginBinding activityPluginBinding) {
-        activityPluginBinding.addOnNewIntentListener(this);
-        this.handleIntent(this.context, activityPluginBinding.getActivity().getIntent());
+        onAttachedToActivity(activityPluginBinding);
     }
 
     @Override
-    public void onDetachedFromActivity() {}
+    public void onDetachedFromActivity() {
+        detachFromActivity();
+    }
+
+    private void detachFromActivity() {
+        if (activityBinding != null) {
+            activityBinding.removeOnNewIntentListener(this);
+            activityBinding = null;
+        }
+    }
 }
